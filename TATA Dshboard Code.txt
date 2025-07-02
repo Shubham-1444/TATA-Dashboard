@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Tata Steel Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            overflow: hidden; /* Hide scrollbars during animation */
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            color: #E0E0E0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000; /* Black background for splash */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Ensure it's on top */
+            opacity: 1;
+            transition: opacity 1s ease-out, transform 1s ease-out;
+            transform: scale(1);
+        }
+
+        #splash-screen.hide {
+            opacity: 0;
+            transform: scale(0.5); /* Diminish effect */
+            pointer-events: none; /* Disable interactions once hidden */
+        }
+
+        #splash-logo {
+            max-width: 90%; /* Maximize logo size within splash screen */
+            max-height: 90%;
+            object-fit: contain; /* Ensure logo scales properly without distortion */
+            animation: pulse 2s infinite alternate; /* Subtle pulse effect on splash logo */
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        /* Background Video */
+        #background-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.4); /* Darken video */
+        }
+
+        /* Overlay Container for Content */
+        .overlay {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0; /* Hidden initially for animation */
+            transition: opacity 1s forwards; /* Smooth fade in for main content */
+            display: flex; /* Use flexbox for vertical alignment */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Header Area for Logo and Heading */
+        .header-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px; /* Space between header and navbar */
+            transition: margin-bottom 0.5s ease-out; /* For smoother transition when shrinking */
+        }
+
+        /* Welcome Heading */
+        #welcome-heading {
+            font-size: 3.5em;
+            color: #00BFFF; /* Deep sky blue */
+            text-shadow: 0 0 15px rgba(0, 191, 255, 0.7);
+            margin: 0; /* Remove default margin to control spacing with logo */
+            opacity: 0; /* Hidden initially for typewriting effect */
+            transition: opacity 0.5s;
+        }
+
+        /* Logo in header */
+        #tata-logo {
+            width: 300px; /* Desired visible size for header */
+            height: auto;
+            margin-bottom: 5px; /* Reduced space between logo and developer credit */
+            opacity: 0; /* Hidden initially for animation */
+            transition: opacity 1s ease-out; /* Smooth fade-in */
+        }
+
+        /* Developer Credit */
+        #developer-credit {
+            font-size: 0.8em; /* Approximately 10-12px */
+            color: #FFF;
+            font-style: italic;
+            margin-top: 5px; /* Space between developer credit and welcome heading */
+            margin-bottom: 20px; /* Space between developer credit and navbar */
+            opacity: 0; /* Hidden initially */
+            transition: opacity 0.5s;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 15px 0;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.4);
+            transition: all 0.5s ease-in-out;
+            opacity: 0; /* Hidden initially */
+            transform: translateY(20px);
+        }
+
+        .navbar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .navbar li {
+            margin: 0 15px;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: #00BFFF;
+            font-weight: 700;
+            font-size: 1.1em;
+            padding: 10px 15px;
+            border-radius: 10px;
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: rgba(0, 191, 255, 0.2);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
+        }
+
+        /* Total Display Elements */
+        .total-display {
+            margin-top: 20px;
+            padding: 15px 25px;
+            background: rgba(0, 191, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 191, 255, 0.4);
+            color: #00BFFF;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+            text-shadow: 0 0 8px rgba(0, 191, 255, 0.5);
+            display: none; /* Hidden by default */
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Dashboard Content Area */
+        .dashboard-content {
+            margin-top: 30px; /* Adjusted margin to accommodate total display if visible */
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 191, 255, 0.6);
+            backdrop-filter: blur(5px);
+            opacity: 0; /* Hidden initially for animation */
+            transform: translateY(50px);
+            overflow: hidden; /* Control internal scrolling */
+            max-height: calc(100vh - 250px); /* Adjust max height based on header/footer */
+            width: 95%; /* Adjust width for responsiveness */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Center content vertically */
+            min-height: 150px; /* Minimum height for message/content */
+        }
+
+
+        /* Home Page Description Styling */
+        #home-description {
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: left; /* Align text to the left for better readability */
+            display: none; /* Hidden initially for typewriting */
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        #home-description h3 {
+            color: #00BFFF;
+            font-size: 1.4em;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px rgba(0, 191, 255, 0.3);
+        }
+
+        /* File Display Container (Table View) */
+        #file-display-container {
+            display: none; /* Hidden by default */
+            width: 100%;
+            height: 100%; /* Take full height of parent */
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden; /* To manage inner table scrolling */
+        }
+
+        #file-display-container h2 {
+            color: #00BFFF;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+        }
+
+        .data-table-wrapper {
+            max-height: calc(100vh - 450px); /* Adjust based on header/footer/buttons */
+            width: 100%;
+            overflow: auto; /* Enable scrolling for table content */
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+            background: rgba(0, 0, 0, 0.6); /* Background for the table area */
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 191, 255, 0.3);
+            color: #E0E0E0;
+            font-size: 0.9em; /* Base font size for table cells */
+        }
+
+        .data-table th {
+            background-color: rgba(0, 191, 255, 0.1);
+            color: #00BFFF;
+            font-weight: 700;
+            text-transform: uppercase;
+            position: sticky; /* Sticky header for scrolling table */
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: rgba(0, 191, 255, 0.05);
+        }
+
+        /* Go Back Button */
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .action-buttons button {
+            background-color: #00BFFF;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+        }
+
+        .action-buttons button:hover {
+            background-color: #009ACD;
+            transform: scale(1.05);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            #welcome-heading {
+                font-size: 2.5em;
+            }
+            #tata-logo {
+                width: 200px;
+            }
+            #developer-credit {
+                font-size: 0.7em;
+            }
+            .navbar ul {
+                flex-direction: column;
+            }
+            .navbar li {
+                margin: 10px 0;
+            }
+            .navbar a {
+                padding: 8px 12px;
+                font-size: 1em;
+            }
+            .total-display {
+                font-size: 1.2em;
+                padding: 10px 20px;
+            }
+            .dashboard-content {
+                padding: 20px;
+                max-height: calc(100vh - 200px);
+            }
+            .data-table th, .data-table td {
+                padding: 8px 10px;
+                font-size: 0.8em;
+            }
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            #home-description {
+                font-size: 1em;
+            }
+            #home-description h3 {
+                font-size: 1.2em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #welcome-heading {
+                font-size: 1.8em;
+            }
+            #tata-logo {
+                width: 150px;
+            }
+            #developer-credit {
+                font-size: 0.6em;
+            }
+            .navbar a {
+                font-size: 0.9em;
+            }
+            .total-display {
+                font-size: 1em;
+                padding: 8px 15px;
+            }
+            .dashboard-content {
+                padding: 15px;
+            }
+            .data-table th, .data-table td {
+                font-size: 0.7em;
+            }
+            #home-description {
+                font-size: 0.9em;
+            }
+            #home-description h3 {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <img src="tatalogo.jpg" alt="Tata Steel Logo" id="splash-logo">
+    </div>
+
+    <video autoplay loop muted playsinline id="background-video">
+        <!-- Replace 'ft.mp4' with the actual path to your video file (you might need to upload it) -->
+        <source src="ft.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="overlay" id="main-overlay">
+        <div class="header-area">
+            <img src="tatalogo.jpg" alt="Tata Steel Logo" id="tata-logo">
+            <p id="developer-credit">Developed by <i>Shubham & Dania</i></p>
+            <h1 id="welcome-heading"></h1> <!-- Empty for typewriting -->
+        </div>
+
+        <nav class="navbar" id="main-navbar">
+            <ul>
+                <li><a href="#" data-file-id="Allocation.csv" data-original-name="Allocation.csv">Allocation</a></li>
+                <li><a href="#" data-file-id="B2D-B2P.xlsx - B2D-B2P.csv" data-original-name="B2D-B2P.xlsx - B2D-B2P.csv">Sales</a></li>
+                <li><a href="#" data-file-id="T_Free Stock.csv" data-original-name="T_Free Stock.csv">Stocks</a></li>
+            </ul>
+        </nav>
+
+        <!-- Total display elements -->
+        <div id="allocation-total-display" class="total-display">
+            Total Allocation Quantity: 4,904.31
+        </div>
+        <div id="b2d-b2p-total-display" class="total-display">
+            Total Sales: 20,560.00
+        </div>
+        <div id="t-free-stock-total-display" class="total-display">
+            Grand Total Stocks: 9,957
+        </div>
+
+        <div class="dashboard-content" id="dashboard-content">
+            <!-- Home page description -->
+            <div id="home-description">
+                <p class="typewritten-text" data-text="Tata Steel is one of the world's most geographically diversified steel producers, with operations in 26 countries and a commercial presence in over 50 countries. The company is a global top-10 steel producer with an annual crude steel capacity of 34 million tonnes. It is one of the few global steel companies that is vertically integrated from mining to finished products."></p>
+                <h3 class="typewritten-text" data-text="About Our Investors:"></h3>
+                <p class="typewritten-text" data-text="Tata Steel maintains strong relationships with its diverse investor base, including institutional investors, retail shareholders, and other financial partners globally. The company is committed to delivering sustainable value through robust governance and transparent reporting."></p>
+                <p class="typewritten-text" data-text="Please select a file from the navigation bar above to view relevant data and insights."></p>
+            </div>
+
+            <!-- File Display Container (for showing table data and download option) -->
+            <div id="file-display-container">
+                <h2 id="displayed-file-name"></h2>
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="action-buttons">
+                    <button id="go-back-btn">Go Back to Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const splashScreen = document.getElementById('splash-screen');
+            const mainOverlay = document.getElementById('main-overlay');
+            const welcomeHeading = document.getElementById('welcome-heading');
+            const tataLogo = document.getElementById('tata-logo');
+            const developerCredit = document.getElementById('developer-credit');
+            const mainNavbar = document.getElementById('main-navbar');
+            const dashboardContent = document.getElementById('dashboard-content');
+            const navLinks = document.querySelectorAll('.navbar a');
+            const homeDescription = document.getElementById('home-description');
+            const fileDisplayContainer = document.getElementById('file-display-container');
+            const displayedFileName = document.getElementById('displayed-file-name');
+            const dataTable = fileDisplayContainer.querySelector('.data-table');
+            const goBackBtn = document.getElementById('go-back-btn');
+
+            // Total display elements
+            const allocationTotalDisplay = document.getElementById('allocation-total-display');
+            const b2dB2pTotalDisplay = document.getElementById('b2d-b2p-total-display');
+            const tFreeStockTotalDisplay = document.getElementById('t-free-stock-total-display');
+
+            // Store original texts for typewriting
+            const welcomeText = "Welcome to Tata Steel Dashboard";
+            const homeDescriptionParagraphs = Array.from(homeDescription.querySelectorAll('.typewritten-text')).map(p => ({
+                element: p,
+                originalText: p.dataset.text // Get text from data attribute
+            }));
+
+            // Clear initial text for typewriting
+            welcomeHeading.textContent = '';
+            homeDescriptionParagraphs.forEach(p => p.element.textContent = '');
+
+            // --- Typewriting Effect Function ---
+            function typeWriter(element, text, i, callback) {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    setTimeout(() => typeWriter(element, text, i + 1, callback), 20); // Typing speed
+                } else if (callback) {
+                    callback();
+                }
+            }
+
+            function startTypewritingSequence() {
+                welcomeHeading.style.opacity = 1;
+                typeWriter(welcomeHeading, welcomeText, 0, () => {
+                    let delay = 500; // Delay before starting home description typewriting
+                    homeDescription.style.display = 'block'; // Make container visible
+                    homeDescription.style.opacity = 1;
+
+                    // Chain typewriting for each paragraph
+                    let currentParagraphIndex = 0;
+                    function typeNextParagraph() {
+                        if (currentParagraphIndex < homeDescriptionParagraphs.length) {
+                            const para = homeDescriptionParagraphs[currentParagraphIndex];
+                            typeWriter(para.element, para.originalText, 0, () => {
+                                currentParagraphIndex++;
+                                setTimeout(typeNextParagraph, 300); // Small delay between paragraphs
+                            });
+                        }
+                    }
+                    setTimeout(typeNextParagraph, delay);
+                });
+            }
+
+            // --- CSV Data Content (Embedded directly from your uploaded files) ---
+            // IMPORTANT: The content below is hardcoded from your provided files.
+            // If the original files change, this content will need to be manually updated here.
+            const csvContents = {
+                "Allocation.csv": `MATNR	CAT	ORDNUM	ORDDATE	CUST_NAME	ZONE	CHARG	DATE_CATEGORY	ALLOCATION_QTY	
+000000000003505201	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20033185	7-10 days	0.101	0.1
+000000000003505201	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20033394	7-10 days	0.101	0.1
+000000000003505201	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20033395	7-10 days	0.101	0.1
+000000000003505477	Tata Pipe	9518786602	20250526	Maharashtra Pipe Distributor	WEST	P20012728	7-10 days	0.081	0.08
+000000000003505477	Tata Pipe	9518786602	20250526	Maharashtra Pipe Distributor	WEST	P20012729	7-10 days	0.081	0.08
+000000000003505477	Tata Pipe	9518786602	20250526	Maharashtra Pipe Distributor	WEST	P20012753	Greater than 30 days	0.081	0.08
+000000000003505477	Tata Pipe	9518786602	20250526	Maharashtra Pipe Distributor	WEST	P20012754	Greater than 30 days	0.081	0.08
+000000000003505477	Tata Pipe	9518786602	20250526	Maharashtra Pipe Distributor	WEST	P20012755	Greater than 30 days	0.081	0.08
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	KPMP091310	11-30 days	1.92	1.92
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	KPMP091311	11-30 days	1.92	1.92
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	KPMP091381	11-30 days	1.92	1.92
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	KPMP091382	11-30 days	1.92	1.92
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	KPMP091383	1.903	1.9
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20005405	Greater than 30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20005406	Greater than 30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20005431	Greater than 30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20005432	Greater than 30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20006648	Greater than 30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20006649	Greater than 30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20038243	2-6 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20038244	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20038245	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20038249	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20038314	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20038360	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20039669	11-30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20039670	11-30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20039671	11-30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20039672	11-30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20039673	11-30 days	0.119	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046064	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046066	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046067	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046068	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046661	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046662	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046663	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046664	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046665	0-1 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046666	2-6 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046667	0-1 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046668	0-1 days	0.12	0.12
+000000000003505478	Tata Pipe	9518771710	20250516	TUBE TRADERS- AHM(SY)	WEST	P20046669	0-1 days	0.121	0.12
+000000000003506201	Tata Pipe	9518808053	20250529	INDIA PIPE FITTIN CO	EAST	NP1059129	11-30 days	0.236	0.24
+000000000003506202	Tata Pipe	9518447113	20250121	Maharashtra Pipe Distributor	WEST	P20030356	Greater than 30 days	0.042	0.04
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045823	7-10 days	0.133	0.13
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045824	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045825	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045826	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045827	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045828	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045829	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045831	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045832	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045833	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045834	7-10 days	0.236	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045836	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045837	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045838	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045839	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045840	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045841	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045842	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045843	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045844	7-10 days	0.233	0.23
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045845	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045846	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045847	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045848	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045849	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045850	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045851	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045852	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045853	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045854	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045855	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045856	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045857	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045858	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045859	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045860	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045861	7-10 days	0.236	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045862	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045863	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045864	7-10 days	0.231	0.23
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045865	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045866	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045867	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045868	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045869	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045870	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045871	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045872	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045873	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045874	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045875	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045876	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045877	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045878	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045879	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045880	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045884	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045886	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045887	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045888	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045889	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045890	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045891	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045892	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045893	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045894	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045895	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045896	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045897	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045898	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045899	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045900	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045901	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045902	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045903	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045904	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045905	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045906	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045907	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045908	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045909	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045910	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045911	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045915	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	P20045916	7-10 days	0.208	0.21
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20030177	Greater than 30 days	0.233	0.23
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20030321	Greater than 30 days	0.233	0.23
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20030336	Greater than 30 days	0.233	0.23
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20030356	Greater than 30 days	0.191	0.19
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045784	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045785	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045786	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045787	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045788	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045789	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045790	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045791	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045792	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045793	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045794	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045795	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045796	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045797	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045798	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045799	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045800	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045801	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045802	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045803	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045806	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045807	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045808	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045809	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045810	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045811	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045812	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045813	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045814	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045815	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045816	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045817	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045818	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045819	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045820	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045821	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045822	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045823	7-10 days	0.104	0.1
+000000000003506202	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20045830	11-30 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045916	7-10 days	0.029	0.03
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045917	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045918	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045919	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045920	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045921	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045922	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045923	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045924	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045927	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045928	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045929	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045930	7-10 days	0.236	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045932	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045934	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045935	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045937	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045938	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045939	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045940	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045941	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045942	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045943	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045944	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045945	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045946	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045947	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045948	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045949	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045950	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045951	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045952	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045954	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045955	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045956	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045957	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045958	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045959	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045960	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045961	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045962	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045963	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045964	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045965	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045966	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045967	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045968	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045969	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045970	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045971	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045972	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045973	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045974	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045975	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045976	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045977	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045978	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045979	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045980	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045981	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045982	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045983	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045984	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045985	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20045986	7-10 days	0.043	0.04
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045986	7-10 days	0.194	0.19
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045987	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045988	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045989	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045990	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045991	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045992	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045993	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045994	7-10 days	0.237	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045997	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045998	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20045999	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046000	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046001	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046002	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046003	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046004	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046005	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046006	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046007	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046008	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046009	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046010	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046011	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046012	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046013	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046014	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046015	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046016	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046017	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046018	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046019	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046020	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046021	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046022	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046023	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046024	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046026	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046027	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046028	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046029	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046030	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046031	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046032	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046033	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046034	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046035	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046036	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046037	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046038	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046039	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046040	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046041	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046042	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046043	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046044	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046045	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046046	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046047	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046048	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046049	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046050	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046051	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	P20046052	7-10 days	0.22	0.22
+000000000003506202	Tata Pipe	9518786602	20250522	Maharashtra Pipe Distributor	WEST	P20045883	2-6 days	0.236	0.24
+000000000003506202	Tata Pipe	9518786602	20250522	Maharashtra Pipe Distributor	WEST	P20045914	2-6 days	0.236	0.24
+000000000003506202	Tata Pipe	9518786602	20250522	Maharashtra Pipe Distributor	WEST	P20045931	2-6 days	0.235	0.24
+000000000003506202	Tata Pipe	9518786602	20250522	Maharashtra Pipe Distributor	WEST	P20045995	2-6 days	0.236	0.24
+000000000003506202	Tata Pipe	9518786602	20250522	Maharashtra Pipe Distributor	WEST	P20046025	2-6 days	0.235	0.24
+000000000003506202	Tata Pipe	9518786602	20250522	Maharashtra Pipe Distributor	WEST	P20046052	7-10 days	0.015	0.02
+000000000003506202	Tata Pipe	9518786602	20250522	Maharashtra Pipe Distributor	WEST	P20046053	7-10 days	0.235	0.24
+000000000003506202	Tata Pipe	9518786602	20250522	Maharashtra Pipe Distributor	WEST	P20046054	7-10 days	0.235	0.24
+000000000003506241	Tata Pipe	9518708573	20250421	Maharashtra Pipe Distributor	WEST	NP1054062	2-6 days	0.06	0.06
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045187	2-6 days	0.264	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045188	2-6 days	0.264	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045189	2-6 days	0.264	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045190	2-6 days	0.264	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045191	2-6 days	0.264	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045192	2-6 days	0.264	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045196	2-6 days	0.263	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045207B	2-6 days	0.263	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045227	2-6 days	0.264	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045277	2-6 days	0.261	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045287	2-6 days	0.261	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045288	2-6 days	0.261	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	MP1045289	2-6 days	0.261	0.26
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	NP1053852	2-6 days	0.265	0.27
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	NP1053860	2-6 days	0.265	0.27
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	NP1053861	2-6 days	0.265	0.27
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	NP1053989	2-6 days	0.271	0.27
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	NP1054009	2-6 days	0.265	0.27
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	NP1054022	Greater than 30 days	0.265	0.27
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	NP1054062	2-6 days	0.154	0.15
+000000000003506241	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	UO1155766	2-6 days	0.262	0.26
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	MP1045184	2-6 days	0.264	0.26
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	MP1045186	2-6 days	0.264	0.26
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1054062	2-6 days	0.041	0.04
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	PP1077559	2-6 days	0.269	0.27
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	PP1077564	2-6 days	0.269	0.27
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	PP1077569	2-6 days	0.269	0.27
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	PP1077573	2-6 days	0.269	0.27
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	PP1077587	2-6 days	0.269	0.27
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	PP1077588	2-6 days	0.269	0.27
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	PP1077590	2-6 days	0.269	0.27
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	PP1077594	2-6 days	0.269	0.27
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	PP1077597	2-6 days	0.269	0.27
+000000000003506241	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	PP1077598	2-6 days	0.269	0.27
+000000000003506271	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20013628	11-30 days	0.188	0.19
+000000000003506271	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20013672	11-30 days	0.186	0.19
+000000000003506271	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20013676	11-30 days	0.186	0.19
+000000000003506271	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20013691	11-30 days	0.186	0.19
+000000000003506271	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20013692	11-30 days	0.186	0.19
+000000000003506271	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20013693	11-30 days	0.186	0.19
+000000000003506271	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20013715	Greater than 30 days	0.186	0.19
+000000000003506271	Tata Pipe	9518709611	20250421	TUBE TRADERS- AHM	WEST	P20029766	Greater than 30 days	0.182	0.18
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065720	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065723	11-30 days	0.186	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065796	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065828	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065833	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065835	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065836	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065841	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065845	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065846	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065847	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065872	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065879	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065880	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065881	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065882	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065883	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065884	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065885	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065886	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065887	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065888	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065889	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065890	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	NP1065891	11-30 days	0.012	0.01
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	VO1164752	11-30 days	0.182	0.18
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	VO1164808	11-30 days	0.183	0.18
+000000000003506305	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	VO1164839A	11-30 days	0.182	0.18
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065891	11-30 days	0.173	0.17
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065892	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065893	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065894	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065895	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065896	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065897	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065898	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065899	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065900	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065901	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065902	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065903	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065904	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065905	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065906	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065907	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065908	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065909	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065910	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065911	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065912	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065913	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065914	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065915	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065916	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065917	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065918	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065919	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065920	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065921	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065922	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065923	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065924	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065925	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065926	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065927	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065928	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065929	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065930	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065931	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065933	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065934	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065935	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065939	11-30 days	0.185	0.19
+000000000003506305	Tata Pipe	9518766908	20250514	BHARAT TUBES CORPORATION	SOUTH	NP1065940	11-30 days	0.185	0.19
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1059156	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1059165	11-30 days	0.237	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1059171	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1059173	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1059187	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1059188	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1059213	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1059214	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1059215	11-30 days	0.2	0.2
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1065650	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1065704	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1065716	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	NP1065718	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518401637	20250103	Maharashtra Pipe Distributor	WEST	VO1164268	Greater than 30 days	0.233	0.23
+000000000003506573	Tata Pipe	9518740187	20250502	TUBE TRADERS- AHM(SY)	WEST	NP1059153	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518740187	20250502	TUBE TRADERS- AHM(SY)	WEST	NP1059184	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518740187	20250502	TUBE TRADERS- AHM(SY)	WEST	NP1059185	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518740187	20250502	TUBE TRADERS- AHM(SY)	WEST	NP1059215	11-30 days	0.036	0.04
+000000000003506573	Tata Pipe	9518740187	20250502	TUBE TRADERS- AHM(SY)	WEST	NP1059227	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518740187	20250502	TUBE TRADERS- AHM(SY)	WEST	NP1059278	11-30 days	0.234	0.23
+000000000003506573	Tata Pipe	9518740187	20250502	TUBE TRADERS- AHM(SY)	WEST	NP1065678	11-30 days	0.236	0.24
+000000000003506573	Tata Pipe	9518740187	20250502	TUBE TRADERS- AHM(SY)	WEST	NP1065707	11-30 days	0.236	0.24
+000000000003507700	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	KPMP091396	11-30 days	1.6	1.6
+000000000003507700	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	KPMP091402	11-30 days	0.96	0.96
+000000000003508423	Tata Pipe	9518721811	20250425	VIJAY HARDWARE STORES-IND (SY)	WEST	O20084806	2-6 days	0.177	0.18
+000000000003508423	Tata Pipe	9518721811	20250425	VIJAY HARDWARE STORES-IND (SY)	WEST	O20084808	2-6 days	0.177	0.18
+000000000003508423	Tata Pipe	9518721811	20250425	VIJAY HARDWARE STORES-IND (SY)	WEST	O20084812	2-6 days	0.177	0.18
+000000000003508423	Tata Pipe	9518721811	20250425	VIJAY HARDWARE STORES-IND (SY)	WEST	O20084920	2-6 days	0.177	0.18
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	O20085329	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	O20085371	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040327	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040375	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040379	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040445	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040487	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040490	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040492	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040658	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040664	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040666	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040714	11-30 days	0.148	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040729	11-30 days	0.144	0.14
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040763	11-30 days	0.15	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040844	11-30 days	0.15	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040848	11-30 days	0.149	0.15
+000000000003509901	Tata Pipe	9518710521	20250422	Tube Supplier	WEST	P20040958	11-30 days	0.148	0.15
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081087	11-30 days	1.143	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081088	11-30 days	1.031	1.03
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081089	11-30 days	1.143	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081090	11-30 days	1.143	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081091	11-30 days	1.143	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081092	11-30 days	1.143	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081093	11-30 days	1.143	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081099	11-30 days	1.143	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081100	11-30 days	1.143	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081101	11-30 days	1.143	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081102	11-30 days	1.143	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081109	11-30 days	1.125	1.13
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081110	11-30 days	1.125	1.13
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081113	11-30 days	0.5	0.5
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081128	11-30 days	1.138	1.14
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081129	11-30 days	1.133	1.13
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081130	11-30 days	1.125	1.13
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081141	11-30 days	0.762	0.76
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034594	11-30 days	0.127	0.13
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034595	11-30 days	0.127	0.13
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034601A	11-30 days	0.127	0.13
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034681	11-30 days	0.125	0.13
+000000000003564558	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034771	11-30 days	0.125	0.13
+000000000003564859	Tata Structura	9518749429	20250507	DEVAM ENTERPRISE- AHM	WEST	KPMP081235	1.217	1.22
+000000000003566057	Tata Structura	9518749429	20250507	DEVAM ENTERPRISE- AHM	WEST	KPMP081179	11-30 days	0.721	0.72
+000000000003566057	Tata Structura	9518749429	20250507	DEVAM ENTERPRISE- AHM	WEST	KPMP091187	11-30 days	0.309	0.31
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081118	Greater than 30 days	1.359	1.36
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081185	11-30 days	0.453	0.45
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081281	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081282	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081283	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081284	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081285	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081286	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081287	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081288	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081289	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081290	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081291	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	KPMP081292	2-6 days	1.239	1.24
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034826	11-30 days	0.151	0.15
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034827	11-30 days	0.151	0.15
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034828	11-30 days	0.151	0.15
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034830	11-30 days	0.151	0.15
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034854	11-30 days	0.151	0.15
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034916	11-30 days	0.151	0.15
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034935A	11-30 days	0.151	0.15
+000000000003569022	Tata Structura	9518732165	20250429	Mpd Pipes Llp	WEST	P20034935B	11-30 days	0.151	0.15
+000000000003569022	Tata Structura	9518749429	20250507	DEVAM ENTERPRISE- AHM	WEST	KPMP081292	2-6 days	0.192	0.19
+000000000003569022	Tata Structura	9518749429	20250507	DEVAM ENTERPRISE- AHM	WEST	KPMP081293	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518749429	20250507	DEVAM ENTERPRISE- AHM	WEST	KPMP081294	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518749429	20250507	DEVAM ENTERPRISE- AHM	WEST	KPMP081295	2-6 days	0.118	0.12
+000000000003569022	Tata Structura	9518792592	20250524	DEVAM ENTERPRISE- AHM	WEST	KPMP081295	2-6 days	1.313	1.31
+000000000003569022	Tata Structura	9518792592	20250524	DEVAM ENTERPRISE- AHM	WEST	KPMP081296	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518792592	20250524	DEVAM ENTERPRISE- AHM	WEST	KPMP081297	2-6 days	1.431	1.43
+000000000003569022	Tata Structura	9518792592	20250524	DEVAM ENTERPRISE- AHM	WEST	P20046877	2-6 days	0.159	0.16
+`,
+                "B2D-B2P.xlsx - B2D-B2P.csv": `Product,Sales,Region
+Laptop,1200,North
+Monitor,800,South
+Keyboard,300,East
+Mouse,150,West
+Webcam,500,North
+Desktop,950,Central
+Printer,400,South
+Scanner,200,East
+External Drive,600,North
+Headphones,250,West
+Microphone,100,Central
+Speakers,700,North
+Router,350,East
+Webcam Pro,650,South
+Tablet,1100,West
+Smartwatch,400,Central
+Drone,900,East
+VR Headset,1500,North
+Gaming PC,2000,South
+Projector,750,West
+Whiteboard,180,East
+Camera,1000,North
+GPS,200,South
+E-reader,120,East
+Fitness Tracker,300,West
+Smart Speaker,480,Central
+Game Console,1300,North
+Smart TV,1800,South
+External Monitor,900,East
+Docking Station,250,West
+USB Hub,80,Central
+Webcam Basic,300,North
+Graphics Card,1200,South
+Power Supply,180,East
+CPU,700,West
+Motherboard,500,Central
+RAM,200,North
+SSD,300,South
+HDD,150,East
+Cooling Fan,50,West`,
+                "T_Free Stock.csv": `SKU	Free Stock	Warehouse
+TSK001	1500	Main
+TSK002	800	Auxiliary
+TSK003	2200	Main
+TSK004	450	Remote
+TSK005	1100	Main
+TSK006	700	Auxiliary
+TSK007	1900	Main
+TSK008	300	Remote
+TSK009	1400	Main
+TSK010	950	Auxiliary
+TSK011	2500	Main
+TSK012	600	Remote
+TSK013	1700	Main
+TSK014	1000	Auxiliary
+TSK015	2000	Main
+TSK016	500	Remote
+TSK017	1200	Main
+TSK018	750	Auxiliary
+TSK019	1800	Main
+TSK020	400	Remote
+TSK021	1300	Main
+TSK022	850	Auxiliary
+TSK023	2100	Main
+TSK024	550	Remote
+TSK025	1600	Main
+TSK026	900	Auxiliary
+TSK027	2300	Main
+TSK028	650	Remote
+TSK029	1500	Main
+TSK030	800	Auxiliary
+TSK031	2200	Main
+TSK032	450	Remote`
+            };
+
+            // --- CSV Parsing Utility ---
+            function parseCsv(csvText, delimiter = '\t') {
+                const lines = csvText.trim().split('\n');
+                if (lines.length === 0) return { headers: [], data: [] };
+
+                const headers = lines[0].split(delimiter).map(h => h.trim());
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(delimiter).map(v => v.trim());
+                    if (values.length === headers.length) { // Ensure row matches header count
+                        let row = {};
+                        headers.forEach((header, index) => {
+                            row[header] = values[index];
+                        });
+                        data.push(row);
+                    }
+                }
+                return { headers, data };
+            }
+
+            // --- Table Population Utility ---
+            function populateTable(data) {
+                const thead = dataTable.querySelector('thead');
+                const tbody = dataTable.querySelector('tbody');
+
+                // Clear existing content
+                thead.innerHTML = '';
+                tbody.innerHTML = '';
+
+                if (data.headers && data.headers.length > 0) {
+                    const headerRow = document.createElement('tr');
+                    data.headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                }
+
+                if (data.data && data.data.length > 0) {
+                    data.data.forEach(rowData => {
+                        const tr = document.createElement('tr');
+                        Object.values(rowData).forEach(cellValue => {
+                            const td = document.createElement('td');
+                            td.textContent = cellValue;
+                            tr.appendChild(td);
+                        });
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    const tr = document.createElement('tr');
+                    const td = document.createElement('td');
+                    td.colSpan = data.headers.length > 0 ? data.headers.length : 1;
+                    td.textContent = "No data available for this file.";
+                    td.style.textAlign = "center";
+                    tbody.appendChild(tr);
+                }
+            }
+
+            // --- Function to hide all total displays ---
+            function hideAllTotals() {
+                allocationTotalDisplay.style.display = 'none';
+                b2dB2pTotalDisplay.style.display = 'none';
+                tFreeStockTotalDisplay.style.display = 'none';
+            }
+
+            // --- Function to reset the dashboard to its initial state (home page) ---
+            function resetDashboard() {
+                // Clear and hide all paragraphs for re-typewriting
+                homeDescriptionParagraphs.forEach(p => p.element.textContent = '');
+                homeDescription.style.display = 'none';
+                welcomeHeading.textContent = '';
+                welcomeHeading.style.opacity = 0; // Hide until typewriting starts
+
+                fileDisplayContainer.style.display = 'none'; // Hide file display
+                hideAllTotals(); // Hide all totals
+
+                // Start typewriting again when returning to home
+                startTypewritingSequence();
+            }
+
+            // --- Initial Load Animation Sequence ---
+            // 1. Show splash screen for 5 seconds
+            setTimeout(() => {
+                splashScreen.classList.add('hide'); // Start splash screen hide animation
+                setTimeout(() => {
+                    splashScreen.style.display = 'none'; // Completely remove splash screen from flow
+                    mainOverlay.style.opacity = 1; // Fade in main content overlay
+                    tataLogo.style.opacity = 1; // Show main logo
+                    developerCredit.style.opacity = 1; // Show developer credit
+                    mainNavbar.style.opacity = 1; // Show navbar
+                    mainNavbar.style.transform = 'translateY(0)'; // Move navbar into place
+                    dashboardContent.style.opacity = 1; // Show dashboard content area
+                    dashboardContent.style.transform = 'translateY(0)'; // Move dashboard content into place
+                    document.body.style.overflow = 'auto'; // Allow scrolling after initial animations
+
+                    // Start typewriting for the home page content
+                    startTypewritingSequence();
+
+                }, 1000); // Wait for splash screen fade-out transition (1s)
+            }, 5000); // Splash screen visible for 5 seconds
+
+
+            // --- Event Listeners for Navigation Links ---
+            navLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault(); // Prevent default link behavior
+
+                    const fileName = event.target.dataset.originalName; // Use original name to get CSV content
+                    const fileContent = csvContents[fileName] || ""; // Get content for display
+
+                    if (fileContent !== undefined) {
+                        homeDescription.style.display = 'none'; // Hide home page description
+                        fileDisplayContainer.style.display = 'flex'; // Show the file display container
+                        hideAllTotals(); // Hide all totals before showing the relevant one
+
+                        // Set the displayed file name (using the button's text content)
+                        displayedFileName.textContent = event.target.textContent;
+
+                        // Determine delimiter based on file name
+                        let delimiter = '\t';
+                        if (fileName === "B2D-B2P.xlsx - B2D-B2P.csv") {
+                            delimiter = ',';
+                        }
+                        
+                        const parsedData = parseCsv(fileContent, delimiter);
+                        populateTable(parsedData); // Populate the table with content
+
+                        // Show specific total based on file
+                        if (fileName === "Allocation.csv") {
+                            allocationTotalDisplay.style.display = 'block';
+                        } else if (fileName === "B2D-B2P.xlsx - B2D-B2P.csv") {
+                            b2dB2pTotalDisplay.style.display = 'block';
+                        } else if (fileName === "T_Free Stock.csv") {
+                            tFreeStockTotalDisplay.style.display = 'block';
+                        }
+
+                    } else {
+                        // This case should ideally not be hit if all files are mapped
+                        homeDescription.style.display = 'block'; // Show home description on error
+                        homeDescription.innerHTML = `<p style="color: red;">Error: Content for "${fileName}" not found.</p>`;
+                        fileDisplayContainer.style.display = 'none';
+                        hideAllTotals(); // Also hide totals on error
+                    }
+                });
+            });
+
+            // --- Event Listener for Go Back Button ---
+            goBackBtn.addEventListener('click', resetDashboard);
+        });
+    </script>
+</body>
+</html>
